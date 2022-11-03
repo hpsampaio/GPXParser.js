@@ -207,6 +207,7 @@ gpxParser.prototype.parse = function (gpxstring) {
         track.elevation = keepThis.calcElevation(trackpoints);
         track.slopes    = keepThis.calculSlope(trackpoints, track.distance.cumul);
         track.segments  = tracksegments;
+        track.points    = trackpoints;
         keepThis.tracks.push(track);
     }
 };
@@ -317,13 +318,13 @@ gpxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
     latlng2.lat = wpt2.lat;
     latlng2.lon = wpt2.lon;
     var rad = Math.PI / 180,
-		    lat1 = latlng1.lat * rad,
-		    lat2 = latlng2.lat * rad,
-		    sinDLat = Math.sin((latlng2.lat - latlng1.lat) * rad / 2),
-		    sinDLon = Math.sin((latlng2.lon - latlng1.lon) * rad / 2),
-		    a = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon,
-		    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	return 6371000 * c;
+            lat1 = latlng1.lat * rad,
+            lat2 = latlng2.lat * rad,
+            sinDLat = Math.sin((latlng2.lat - latlng1.lat) * rad / 2),
+            sinDLon = Math.sin((latlng2.lon - latlng1.lon) * rad / 2),
+            a = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon,
+            c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return 6371000 * c;
 };
 
 /**
