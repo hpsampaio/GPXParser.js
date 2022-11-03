@@ -1,3 +1,40 @@
+## Fork Changes
+
+### Improvements
+As indicated by the [GPX standards](https://www.topografix.com/gpx_manual.asp), GPX files may have a ``<trkseg>`` **Track Segment** property. 
+- Track Segment included to the GPXParser Object
+- Prototype ``calculTime`` included to calc the **total time** and **cumulated time**, both to **Segments** and to **Tracks**
+
+### Adjustments
+- Adjusted the cumulated distance array (the last element was being duplicated)
+
+### NEW Track object
+| Property | Type   | Description       |
+| -------- | ------ | ----------------- |
+| name     | String | Point name |
+| cmt      | String | Comment           |
+| desc     | String | Point description |
+| src      | String | Used device           |
+| number      | String | Track identifier           |
+| link      | String | Link to a web address           |
+| type      | String | Track type           |
+| **segments** (new)     | Array | Segments object array |
+| points      | Array | Points object array |
+| distance      | Distance Object | Distance informations about the Track |
+| **time** (new)     | Time Object | Time informations about the Track |
+| elevation      | Elevation Object | Elevation informations about the Track |
+| slopes      | Float Array | Slope of each sub-segment|
+
+### NEW Segment object
+| Property | Type   | Description       |
+| -------- | ------ | ----------------- |
+| points      | Array | Points object array |
+| distance      | Distance Object | Distance informations about the Segment |
+| time      | Time Object | Time informations about the Segment |
+| elevation      | Elevation Object | Elevation informations about the Segment |
+| slopes      | Float Array | Slope of each sub-segment|
+
+
 ![GPXParser](https://raw.githubusercontent.com/Luuka/gpx-parser/feature/new-demo/demo/Logo.png)
 
 # GPXParser.js
