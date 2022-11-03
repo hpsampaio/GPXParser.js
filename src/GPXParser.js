@@ -154,9 +154,41 @@ gpxParser.prototype.parse = function (gpxstring) {
         }
         track.link = link;
 
+        let tracksegments = [];
+        let trksegs = [].slice.call(trk.querySelectorAll('trkseg'));
+        for (let idxIs in trksegs){
+            var trkseg = trksegs[idxIs];
+            let segment = {};
+
+            let segmentpoints = [];
+            let segpts = [].slice.call(trkseg.querySelectorAll('trkpt'));
+            for (let idxIn in segpts){
+                var segpt = segpts[idxIn];
+                let pt = {};
+                pt.lat = parseFloat(segpt.getAttribute("lat"));
+                pt.lon = parseFloat(segpt.getAttribute("lon"));
+
+                let floatValue = parseFloat(keepThis.getElementValue(segpt, "ele")); 
+                pt.ele = isNaN(floatValue) ? null : floatValue;
+
+                let time = keepThis.getElementValue(segpt, "time");
+                pt.time = time == null ? null : new Date(time);
+
+                segmentpoints.push(pt);
+            }
+
+            segment.distance  = keepThis.calculDistance(segmentpoints);
+            segment.time      = keepThis.calculTime(segmentpoints);
+            segment.elevation = keepThis.calcElevation(segmentpoints);
+            segment.slopes    = keepThis.calculSlope(segmentpoints, segment.distance.cumul);
+            segment.points    = segmentpoints;
+
+            tracksegments.push(segment);
+        }
+
         let trackpoints = [];
         let trkpts = [].slice.call(trk.querySelectorAll('trkpt'));
-	    for (let idxIn in trkpts){
+        for (let idxIn in trkpts){
             var trkpt = trkpts[idxIn];
             let pt = {};
             pt.lat = parseFloat(trkpt.getAttribute("lat"));
@@ -171,10 +203,10 @@ gpxParser.prototype.parse = function (gpxstring) {
             trackpoints.push(pt);
         }
         track.distance  = keepThis.calculDistance(trackpoints);
+        track.time      = keepThis.calculTime(trackpoints);
         track.elevation = keepThis.calcElevation(trackpoints);
         track.slopes    = keepThis.calculSlope(trackpoints, track.distance.cumul);
-        track.points    = trackpoints;
-
+        track.segments  = tracksegments;
         keepThis.tracks.push(track);
     }
 };
@@ -238,12 +270,35 @@ gpxParser.prototype.calculDistance = function(points) {
         totalDistance += this.calcDistanceBetween(points[i],points[i+1]);
         cumulDistance[i] = totalDistance;
     }
-    cumulDistance[points.length - 1] = totalDistance;
+    cumulDistance[cumulDistance.length - 1] = totalDistance;
 
     distance.total = totalDistance;
     distance.cumul = cumulDistance;
 
     return distance;
+};
+
+/**
+ * Calcul the Time Object from an array of points
+ * 
+ * @param  {} points - An array of points with lat and lon properties
+ * 
+ * @return {TimeObject} An object with total time and Cumulative times
+ */
+gpxParser.prototype.calculTime = function(points) {
+    let time = {};
+    let totalTime = 0;
+    let cumulTime = [];
+    for (var i = 0; i < points.length - 1; i++) {
+        totalTime += this.calcTimeBetween(points[i],points[i+1]);
+        cumulTime[i] = totalTime;
+    }
+    cumulTime[cumulTime.length - 1] = totalTime;
+
+    time.total = totalTime;
+    time.cumul = cumulTime;
+
+    return time;
 };
 
 /**
@@ -269,6 +324,20 @@ gpxParser.prototype.calcDistanceBetween = function (wpt1, wpt2) {
 		    a = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon,
 		    c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 	return 6371000 * c;
+};
+
+/**
+ * Calcul Time between two points with lat and lon
+ * 
+ * @param  {} wpt1 - A geographic point with time propertie
+ * @param  {} wpt2 - A geographic point with time propertie
+ * 
+ * @returns {float} The time between the two points
+ */
+gpxParser.prototype.calcTimeBetween = function (wpt1, wpt2) {
+    let time1 = wpt1.time;
+    let time2 = wpt2.time;
+    return time2 - time1;
 };
 
 /**
